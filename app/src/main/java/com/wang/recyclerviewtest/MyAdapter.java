@@ -10,30 +10,60 @@ import android.widget.Toast;
 
 import java.util.List;
 
-public class MyAdapter extends RecyclerView.Adapter<MyAdapter.ViewHolder> {
+public class MyAdapter extends RecyclerView.Adapter<RecyclerView.ViewHolder> {
 
     private List<Number>  numberList;
 
     private static final int ITEM_VIEW_ZERO=1;
     private static final int ITEM_VIEW_None_ZERO=0;
 
-    static class ViewHolder extends RecyclerView.ViewHolder{
+    private static class ZeroViewHolder extends RecyclerView.ViewHolder{
        TextView textView;
-        public ViewHolder(View view){
+        public ZeroViewHolder(View view){
             super(view);
             textView=(TextView)view.findViewById(R.id.item_tv);
         }
     }
 
+
+    private static class NoneZeroViewHolder extends RecyclerView.ViewHolder{
+        TextView left_tv;
+        TextView right_tv;
+        public NoneZeroViewHolder(View view){
+            super(view);
+           left_tv=(TextView)view.findViewById(R.id.item_left_tv);
+           right_tv=(TextView)view.findViewById(R.id.item_right_tv);
+        }
+    }
+
+
+
     public MyAdapter(List<Number> numberList) {
         this.numberList = numberList;
     }
 
+
+
+
     @NonNull
     @Override
-    public ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        
-        View view= LayoutInflater.from(parent.getContext()).inflate(R.layout.item_tv,parent,false);
+    public RecyclerView.ViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+
+        LayoutInflater minflater=LayoutInflater.from(parent.getContext());
+        RecyclerView.ViewHolder holder=null;
+        if(viewType==ITEM_VIEW_ZERO){
+             View view= minflater.inflate(R.layout.item_zero_tv,parent,false);
+             holder=new ZeroViewHolder(view);
+
+        }
+        else {
+             View view= minflater.inflate(R.layout.item_none_zero_tv,parent,false);
+             holder=new NoneZeroViewHolder(view);
+        }
+        return holder;
+
+      /*
+        View view= LayoutInflater.from(parent.getContext()).inflate(R.layout.item_zero_tv,parent,false);
         final ViewHolder holder=new ViewHolder(view);
         holder.textView.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -45,23 +75,33 @@ public class MyAdapter extends RecyclerView.Adapter<MyAdapter.ViewHolder> {
         });
 
         return  holder;
+        */
+
     }
 
     @Override
-    public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
-        Number number=numberList.get(position);
-        holder.textView.setText(number.value+"");
+    public void onBindViewHolder(@NonNull RecyclerView.ViewHolder holder, int position) {
+        if(holder instanceof ZeroViewHolder){
+            Number number=numberList.get((position+1)/2*3-1);
+            ((ZeroViewHolder)holder).textView.setText(number.value+"");
+        }
+        else{
+            Number number=numberList.get((position+1)*3/2-1);
+            ((NoneZeroViewHolder)holder).left_tv.setText(number.value+"");
+            ((NoneZeroViewHolder)holder).right_tv.setText((number.value+1)+"");
+        }
 
     }
 
     @Override
     public int getItemViewType(int position) {
-        return isZeroItem(position) ? ITEM_VIEW_ZERO : ITEM_VIEW_None_ZERO;
+        return position%2==0 ? ITEM_VIEW_None_ZERO : ITEM_VIEW_ZERO;
     }
 
     @Override
     public int getItemCount() {
-        return numberList.size();
+        //return numberList.size()%2==0 ? numberList.size()/2+1 : numberList.size()/2+2;
+        return numberList.size()%3==0 ? numberList.size()/3*2 : numberList.size()/3*2+1;
     }
 
     public boolean isZeroItem(int position){
